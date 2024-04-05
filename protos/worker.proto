@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package worker;
+
+// Importa le definizioni di altri file .proto se necessario
+// import "google/protobuf/any.proto";
+
+// Definizione del messaggio per la richiesta di un task da parte del worker
+message TaskRequest {
+  string worker_id = 1;
+}
+
+// Definizione del messaggio per la risposta del driver con i dettagli del task assegnato
+message TaskResponse {
+  bool ack = 1;
+  string task_type = 2;
+  int32 task_id = 3;
+}
+
+// Definizione del servizio per la comunicazione tra worker e driver
+service WorkerService {
+  // Metodo per richiedere un task
+  rpc RequestTask(TaskRequest) returns (TaskResponse);
+}
+
