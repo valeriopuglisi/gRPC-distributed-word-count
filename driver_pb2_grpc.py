@@ -20,6 +20,11 @@ class MapReduceDriverStub(object):
                 request_serializer=driver__pb2.AssignTaskRequest.SerializeToString,
                 response_deserializer=driver__pb2.AssignTaskResponse.FromString,
                 )
+        self.UpdateTaskStatus = channel.unary_unary(
+                '/driver.MapReduceDriver/UpdateTaskStatus',
+                request_serializer=driver__pb2.UpdateTaskStatusRequest.SerializeToString,
+                response_deserializer=driver__pb2.UpdateTaskStatusResponse.FromString,
+                )
         self.CompleteTask = channel.unary_unary(
                 '/driver.MapReduceDriver/CompleteTask',
                 request_serializer=driver__pb2.CompleteTaskRequest.SerializeToString,
@@ -33,6 +38,13 @@ class MapReduceDriverServicer(object):
 
     def AssignTask(self, request, context):
         """Metodo per assegnare un task a un worker
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateTaskStatus(self, request, context):
+        """update task status
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -52,6 +64,11 @@ def add_MapReduceDriverServicer_to_server(servicer, server):
                     servicer.AssignTask,
                     request_deserializer=driver__pb2.AssignTaskRequest.FromString,
                     response_serializer=driver__pb2.AssignTaskResponse.SerializeToString,
+            ),
+            'UpdateTaskStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateTaskStatus,
+                    request_deserializer=driver__pb2.UpdateTaskStatusRequest.FromString,
+                    response_serializer=driver__pb2.UpdateTaskStatusResponse.SerializeToString,
             ),
             'CompleteTask': grpc.unary_unary_rpc_method_handler(
                     servicer.CompleteTask,
@@ -83,6 +100,23 @@ class MapReduceDriver(object):
         return grpc.experimental.unary_unary(request, target, '/driver.MapReduceDriver/AssignTask',
             driver__pb2.AssignTaskRequest.SerializeToString,
             driver__pb2.AssignTaskResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def UpdateTaskStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/driver.MapReduceDriver/UpdateTaskStatus',
+            driver__pb2.UpdateTaskStatusRequest.SerializeToString,
+            driver__pb2.UpdateTaskStatusResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

@@ -12,29 +12,29 @@ from google.protobuf.internal import builder as _builder
 _sym_db = _symbol_database.Default()
 
 
+import task_pb2 as task__pb2
+import worker_pb2 as worker__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x64river.proto\x12\x06\x64river\"t\n\x04Task\x12#\n\x04type\x18\x01 \x01(\x0e\x32\x15.driver.Task.TaskType\x12\n\n\x02id\x18\x02 \x01(\x05\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\")\n\x08TaskType\x12\x08\n\x04NONE\x10\x00\x12\x07\n\x03MAP\x10\x01\x12\n\n\x06REDUCE\x10\x02\"&\n\x11\x41ssignTaskRequest\x12\x11\n\tworker_id\x18\x01 \x01(\t\"\\\n\x12\x41ssignTaskResponse\x12\x1f\n\x04task\x18\x01 \x01(\x0b\x32\x0c.driver.TaskH\x00\x88\x01\x01\x12\x12\n\x05\x65rror\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\x07\n\x05_taskB\x08\n\x06_error\"D\n\x13\x43ompleteTaskRequest\x12\x1a\n\x04task\x18\x01 \x01(\x0b\x32\x0c.driver.Task\x12\x11\n\tworker_id\x18\x02 \x01(\t\"#\n\x14\x43ompleteTaskResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"\x07\n\x05\x45mpty2\xa1\x01\n\x0fMapReduceDriver\x12\x43\n\nAssignTask\x12\x19.driver.AssignTaskRequest\x1a\x1a.driver.AssignTaskResponse\x12I\n\x0c\x43ompleteTask\x12\x1b.driver.CompleteTaskRequest\x1a\x1c.driver.CompleteTaskResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x64river.proto\x12\x06\x64river\x1a\ntask.proto\x1a\x0cworker.proto\"3\n\x11\x41ssignTaskRequest\x12\x1e\n\x06worker\x18\x01 \x01(\x0b\x32\x0e.worker.Worker\"Z\n\x12\x41ssignTaskResponse\x12\x1d\n\x04task\x18\x01 \x01(\x0b\x32\n.task.TaskH\x00\x88\x01\x01\x12\x12\n\x05\x65rror\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\x07\n\x05_taskB\x08\n\x06_error\"S\n\x17UpdateTaskStatusRequest\x12\x1e\n\x06worker\x18\x01 \x01(\x0b\x32\x0e.worker.Worker\x12\x18\n\x04task\x18\x02 \x01(\x0b\x32\n.task.Task\"\'\n\x18UpdateTaskStatusResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"B\n\x13\x43ompleteTaskRequest\x12\x18\n\x04task\x18\x01 \x01(\x0b\x32\n.task.Task\x12\x11\n\tworker_id\x18\x02 \x01(\t\"#\n\x14\x43ompleteTaskResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32\xf8\x01\n\x0fMapReduceDriver\x12\x43\n\nAssignTask\x12\x19.driver.AssignTaskRequest\x1a\x1a.driver.AssignTaskResponse\x12U\n\x10UpdateTaskStatus\x12\x1f.driver.UpdateTaskStatusRequest\x1a .driver.UpdateTaskStatusResponse\x12I\n\x0c\x43ompleteTask\x12\x1b.driver.CompleteTaskRequest\x1a\x1c.driver.CompleteTaskResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'driver_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_TASK']._serialized_start=24
-  _globals['_TASK']._serialized_end=140
-  _globals['_TASK_TASKTYPE']._serialized_start=99
-  _globals['_TASK_TASKTYPE']._serialized_end=140
-  _globals['_ASSIGNTASKREQUEST']._serialized_start=142
-  _globals['_ASSIGNTASKREQUEST']._serialized_end=180
-  _globals['_ASSIGNTASKRESPONSE']._serialized_start=182
-  _globals['_ASSIGNTASKRESPONSE']._serialized_end=274
-  _globals['_COMPLETETASKREQUEST']._serialized_start=276
-  _globals['_COMPLETETASKREQUEST']._serialized_end=344
-  _globals['_COMPLETETASKRESPONSE']._serialized_start=346
-  _globals['_COMPLETETASKRESPONSE']._serialized_end=381
-  _globals['_EMPTY']._serialized_start=383
-  _globals['_EMPTY']._serialized_end=390
-  _globals['_MAPREDUCEDRIVER']._serialized_start=393
-  _globals['_MAPREDUCEDRIVER']._serialized_end=554
+  _globals['_ASSIGNTASKREQUEST']._serialized_start=50
+  _globals['_ASSIGNTASKREQUEST']._serialized_end=101
+  _globals['_ASSIGNTASKRESPONSE']._serialized_start=103
+  _globals['_ASSIGNTASKRESPONSE']._serialized_end=193
+  _globals['_UPDATETASKSTATUSREQUEST']._serialized_start=195
+  _globals['_UPDATETASKSTATUSREQUEST']._serialized_end=278
+  _globals['_UPDATETASKSTATUSRESPONSE']._serialized_start=280
+  _globals['_UPDATETASKSTATUSRESPONSE']._serialized_end=319
+  _globals['_COMPLETETASKREQUEST']._serialized_start=321
+  _globals['_COMPLETETASKREQUEST']._serialized_end=387
+  _globals['_COMPLETETASKRESPONSE']._serialized_start=389
+  _globals['_COMPLETETASKRESPONSE']._serialized_end=424
+  _globals['_MAPREDUCEDRIVER']._serialized_start=427
+  _globals['_MAPREDUCEDRIVER']._serialized_end=675
 # @@protoc_insertion_point(module_scope)

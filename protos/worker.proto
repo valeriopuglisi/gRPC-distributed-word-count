@@ -5,21 +5,18 @@ package worker;
 // Importa le definizioni di altri file .proto se necessario
 // import "google/protobuf/any.proto";
 
-// Definizione del messaggio per la richiesta di un task da parte del worker
-message TaskRequest {
-  string worker_id = 1;
+
+message Worker {
+  string id = 1;
+  string host = 2;
+  int32 port = 3;
+  WorkerStatus status = 4;
 }
 
-// Definizione del messaggio per la risposta del driver con i dettagli del task assegnato
-message TaskResponse {
-  bool ack = 1;
-  string task_type = 2;
-  int32 task_id = 3;
-}
-
-// Definizione del servizio per la comunicazione tra worker e driver
-service WorkerService {
-  // Metodo per richiedere un task
-  rpc RequestTask(TaskRequest) returns (TaskResponse);
+enum WorkerStatus {
+  IDLE = 0;
+  IN_PROGRESS = 1;
+  COMPLETED = 2;
+  FAILED = 3;
 }
 

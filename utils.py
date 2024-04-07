@@ -36,7 +36,6 @@ def read_intermediate_files(task_id: int, num_map_tasks: int) -> List[str]:
     root_path = "./intermediate_files"
     for file in os.listdir(root_path):
         file_path = os.path.join(root_path,file)
-        # print(f"file:{file}")
         filename_split = file.split("-")
         file_bucket_id = filename_split[-1]
         if int(task_id) == int(file_bucket_id):

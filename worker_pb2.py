@@ -14,17 +14,15 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cworker.proto\x12\x06worker\" \n\x0bTaskRequest\x12\x11\n\tworker_id\x18\x01 \x01(\t\"?\n\x0cTaskResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12\x0f\n\x07task_id\x18\x03 \x01(\x05\x32I\n\rWorkerService\x12\x38\n\x0bRequestTask\x12\x13.worker.TaskRequest\x1a\x14.worker.TaskResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cworker.proto\x12\x06worker\"V\n\x06Worker\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\x12$\n\x06status\x18\x04 \x01(\x0e\x32\x14.worker.WorkerStatus*D\n\x0cWorkerStatus\x12\x08\n\x04IDLE\x10\x00\x12\x0f\n\x0bIN_PROGRESS\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'worker_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_TASKREQUEST']._serialized_start=24
-  _globals['_TASKREQUEST']._serialized_end=56
-  _globals['_TASKRESPONSE']._serialized_start=58
-  _globals['_TASKRESPONSE']._serialized_end=121
-  _globals['_WORKERSERVICE']._serialized_start=123
-  _globals['_WORKERSERVICE']._serialized_end=196
+  _globals['_WORKERSTATUS']._serialized_start=112
+  _globals['_WORKERSTATUS']._serialized_end=180
+  _globals['_WORKER']._serialized_start=24
+  _globals['_WORKER']._serialized_end=110
 # @@protoc_insertion_point(module_scope)

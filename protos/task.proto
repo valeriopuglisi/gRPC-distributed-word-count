@@ -1,0 +1,27 @@
+// Definizione del messaggio per un task generico
+syntax = "proto3";
+
+package task;
+
+enum TaskType {
+    NONE = 0; // Nessun task assegnato
+    MAP = 1;  // Task di tipo Map
+    REDUCE = 2; // Task di tipo Reduce
+}
+
+enum TaskStatus {
+    UNASSIGNED = 0;
+    IN_PROGRESS = 1;
+    COMPLETED = 2;
+    FAILED = 3;
+}
+
+message Task {
+    int32 id = 1; // Identificativo del task
+    TaskType type = 2; // Tipo di task
+    TaskStatus status = 3; // Stato del task
+    string filename = 4; // Nome del file per i task di tipo Map, se applicabile
+  }
+
+
+

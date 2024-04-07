@@ -1,31 +1,32 @@
 syntax = "proto3";
 
 package driver;
+import "task.proto";
+import "worker.proto";
 
 
-// Definizione del messaggio per un task generico
-message Task {
-  enum TaskType {
-    NONE = 0; // Nessun task assegnato
-    MAP = 1;  // Task di tipo Map
-    REDUCE = 2; // Task di tipo Reduce
-  }
-  TaskType type = 1; // Tipo di task
-  int32 id = 2; // Identificativo del task
-  string filename = 3; // Nome del file per i task di tipo Map, se applicabile
-}
 
 message AssignTaskRequest {
-  string worker_id = 1;
+  worker.Worker worker = 1;
 }
 
 message AssignTaskResponse {
-  optional Task task = 1;
+  optional task.Task task = 1;
   optional string error = 2; 
 }
 
+message UpdateTaskStatusRequest {
+  worker.Worker worker = 1;
+  task.Task task = 2;
+}
+
+message UpdateTaskStatusResponse {
+  bool ack = 1;
+}
+
+
 message CompleteTaskRequest {
-  Task task = 1;
+  task.Task task = 1;
   string worker_id = 2;
 }
 message CompleteTaskResponse {
@@ -33,14 +34,14 @@ message CompleteTaskResponse {
 }
 
 
-
-// Messaggio vuoto utilizzato per alcune risposte
-message Empty {}
-
 // Servizio fornito dal driver per gestire i task MapReduce
 service MapReduceDriver {
   // Metodo per assegnare un task a un worker
   rpc AssignTask(AssignTaskRequest) returns (AssignTaskResponse);
+
+  //update task status
+  rpc UpdateTaskStatus(UpdateTaskStatusRequest) returns (UpdateTaskStatusResponse);
+
   // Segnala il completamento di un task da parte di un worker
   rpc CompleteTask(CompleteTaskRequest) returns (CompleteTaskResponse);
   
