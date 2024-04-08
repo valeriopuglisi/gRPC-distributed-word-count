@@ -78,6 +78,7 @@ class WorkerService():
             logging.info("Driver assigned NONE task ... Task Finished")
             self.worker.status = worker_pb2.WorkerStatus.FINISHED
             self.task.status = task_pb2.TaskStatus.COMPLETED
+            self.UpdateTaskStatusDriver()
         
         elif self.task.type == task_pb2.TaskType.WAIT:
             logging.info("Driver assigned NONE task ... Task In Progress")
