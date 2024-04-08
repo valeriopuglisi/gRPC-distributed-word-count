@@ -4,18 +4,14 @@ from concurrent import futures
 import time
 from typing import List
 import config
-import numpy
 import pandas as pd
 import argparse
 # Assuming gRPC is chosen based on the config snippet provided
-import driver_pb2
-import driver_pb2_grpc
-import worker_pb2
-import worker_pb2_grpc
-import task_pb2
-import task_pb2_grpc
+import libs.driver_pb2 as driver_pb2
+import libs.driver_pb2_grpc as driver_pb2_grpc
+import libs.worker_pb2 as worker_pb2
+import libs.task_pb2 as task_pb2
 import threading
-
 import warnings
 
 # Disabilita i FutureWarning di pandas
@@ -28,7 +24,7 @@ from config import (
     INPUT_FILES_DIR,
     NUM_MAP_TASKS,
     NUM_REDUCE_TASKS,
-    COMMUNICATION_PROTOCOL,
+    UPDATE_TASK_STATUS_INTERVAL_SEC,
 )
 
 import logging
@@ -64,7 +60,7 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
         self.logger.info(f"INPUT_FILES_DIR: {INPUT_FILES_DIR}")
         self.logger.info(f"NUM_MAP_TASKS: {NUM_MAP_TASKS}")
         self.logger.info(f"NUM_REDUCE_TASKS: {NUM_REDUCE_TASKS}")
-        self.logger.info(f"COMMUNICATION_PROTOCOL: {COMMUNICATION_PROTOCOL}")
+        self.logger.info(f"UPDATE_TASK_STATUS_INTERVAL_SEC: {UPDATE_TASK_STATUS_INTERVAL_SEC}")
 
 
     def __get_input_files(self) -> List[str]:
@@ -98,12 +94,12 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
         self.workers.to_csv("workers.csv", index=False)
 
         
-    def __set_task_unassigned(self, task_id , time_intervsal_sec=60):
+    def __set_task_unassigned(self, task_id , task_type, time_intervsal_sec=config.UPDATE_TASK_STATUS_INTERVAL_SEC):
         """
         Imposta lo stato di un task come UNASSIGNED se il worker non aggiorna lo stato entro 60 secondi.
         """
         # Cerca il task corrispondente nella lista dei workers
-        task = self.workers[self.workers["task_id"] == task_id]
+        task = self.workers[(self.workers["task_id"] == task_id) & (self.workers["task_type"] == task_type)]
         if not task.empty and task["task_status"].iloc[0] != task_pb2.TaskStatus.COMPLETED:
             # Imposta lo stato del task come UNASSIGNED
             self.workers.loc[task.index, "task_status"] = task_pb2.TaskStatus.UNASSIGNED
@@ -188,7 +184,8 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
             self.workers.loc[worker.index, "worker_status"] = request.worker.status
             self.logger.debug("==> UpdateTaskStatus: Updated task ID %s with status %s", request.task.id, request.task.status)
             # Set timer for check if the task is completed
-            timer = threading.Timer(60.0, self.__set_task_unassigned, [request.task.id])
+            update_timer = config.UPDATE_TASK_STATUS_INTERVAL_SEC
+            timer = threading.Timer(update_timer, self.__set_task_unassigned, [request.task.id, request.task.type])
             timer.start()
             if verbose:
                 self.workers.to_csv("workers.csv", index=False)
@@ -224,7 +221,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_files_dir', type=str, default=config.OUTPUT_FILES_DIR, help='Directory for storing output files')
     parser.add_argument('--num_map_tasks', type=int, default=config.NUM_MAP_TASKS, help='Number of map tasks')
     parser.add_argument('--num_reduce_tasks', type=int, default=config.NUM_REDUCE_TASKS, help='Number of reduce tasks')
-    parser.add_argument('--communication_protocol', type=str, default=config.COMMUNICATION_PROTOCOL, help='Communication protocol (gRPC or REST)')
+    parser.add_argument('--update_task_status_interval_sec', type=int, default=config.UPDATE_TASK_STATUS_INTERVAL_SEC, help='Update task status interval in seconds')
 
     args = parser.parse_args()
 
@@ -243,8 +240,8 @@ if __name__ == '__main__':
         config.NUM_MAP_TASKS = args.num_map_tasks
     if args.num_reduce_tasks is not None:
         config.NUM_REDUCE_TASKS = args.num_reduce_tasks
-    if args.communication_protocol is not None:
-        config.COMMUNICATION_PROTOCOL = args.communication_protocol
+    if args.update_task_status_interval_sec is not None:
+        config.UPDATE_TASK_STATUS_INTERVAL_SEC = args.update_task_status_interval_sec
     # log the new configuration
 
 

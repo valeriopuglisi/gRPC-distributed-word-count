@@ -4,12 +4,12 @@ import sys
 from concurrent import futures
 import time
 import threading
-import task_pb2
-import task_pb2_grpc
-import worker_pb2
-import worker_pb2_grpc
-import driver_pb2
-import driver_pb2_grpc
+import libs.task_pb2 as task_pb2
+import libs.task_pb2_grpc as task_pb2_grpc
+import libs.worker_pb2 as worker_pb2
+import libs.worker_pb2_grpc as worker_pb2_grpc
+import libs.driver_pb2 as driver_pb2
+import libs.driver_pb2_grpc as driver_pb2_grpc
 from config import DRIVER_HOST, DRIVER_PORT
 from utils import split_text_into_words, get_bucket_id, write_to_intermediate_file, read_intermediate_files, count_words, write_final_output
 import config

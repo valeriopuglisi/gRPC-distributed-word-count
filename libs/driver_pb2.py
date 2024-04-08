@@ -12,8 +12,8 @@ from google.protobuf.internal import builder as _builder
 _sym_db = _symbol_database.Default()
 
 
-import task_pb2 as task__pb2
-import worker_pb2 as worker__pb2
+import libs.task_pb2 as task__pb2
+import libs.worker_pb2 as worker__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x64river.proto\x12\x06\x64river\x1a\ntask.proto\x1a\x0cworker.proto\"3\n\x11\x41ssignTaskRequest\x12\x1e\n\x06worker\x18\x01 \x01(\x0b\x32\x0e.worker.Worker\"Z\n\x12\x41ssignTaskResponse\x12\x1d\n\x04task\x18\x01 \x01(\x0b\x32\n.task.TaskH\x00\x88\x01\x01\x12\x12\n\x05\x65rror\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\x07\n\x05_taskB\x08\n\x06_error\"S\n\x17UpdateTaskStatusRequest\x12\x1e\n\x06worker\x18\x01 \x01(\x0b\x32\x0e.worker.Worker\x12\x18\n\x04task\x18\x02 \x01(\x0b\x32\n.task.Task\"\'\n\x18UpdateTaskStatusResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\"O\n\x13\x43ompleteTaskRequest\x12\x1e\n\x06worker\x18\x01 \x01(\x0b\x32\x0e.worker.Worker\x12\x18\n\x04task\x18\x02 \x01(\x0b\x32\n.task.Task\"#\n\x14\x43ompleteTaskResponse\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\x08\x32\xf8\x01\n\x0fMapReduceDriver\x12\x43\n\nAssignTask\x12\x19.driver.AssignTaskRequest\x1a\x1a.driver.AssignTaskResponse\x12U\n\x10UpdateTaskStatus\x12\x1f.driver.UpdateTaskStatusRequest\x1a .driver.UpdateTaskStatusResponse\x12I\n\x0c\x43ompleteTask\x12\x1b.driver.CompleteTaskRequest\x1a\x1c.driver.CompleteTaskResponseb\x06proto3')

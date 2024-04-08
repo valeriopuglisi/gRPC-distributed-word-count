@@ -25,7 +25,7 @@ NUM_REDUCE_TASKS = 4  # Assuming English alphabet
 
 # Communication Protocol
 # This can be either 'gRPC' or 'REST'. Change according to your preference and implementation.
-COMMUNICATION_PROTOCOL = 'gRPC'
+UPDATE_TASK_STATUS_INTERVAL_SEC = 10
 
 # Additional configuration parameters can be added here as needed.
 # For example, you might want to add authentication for the server-client communication,

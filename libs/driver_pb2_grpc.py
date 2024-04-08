@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import driver_pb2 as driver__pb2
+import libs.driver_pb2 as driver__pb2
 
 
 class MapReduceDriverStub(object):
