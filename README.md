@@ -1,53 +1,76 @@
-# Distributed Map-Reduce Word Count
+# MapReduce Framework Documentation
 
-This project implements a distributed map-reduce system to solve the word count problem using Python. It utilizes either gRPC or REST API for server-client communication, focusing on processing a set of text files to produce a count of how many times each word occurs across all files.
+This documentation provides an overview of the MapReduce framework implemented in `driver.py` and `worker.py` files, detailing the logic, implementation, and methods of both components within a distributed computing environment.
 
-## Project Structure
+## Overview
 
-- `utils.py`: Contains utility functions for processing text, including splitting text into words, determining bucket IDs, and reading/writing intermediate and final output files.
-- `config.py`: Configuration settings for the distributed map-reduce system, including server details, file paths, and task configurations.
-- `driver.py`: The driver (server) part of the system, responsible for distributing tasks to workers and aggregating results.
-- `worker.py`: The worker (client) part of the system, responsible for executing map and reduce tasks assigned by the driver.
-- `README.md`: This file, providing an overview and instructions for the project.
+The MapReduce framework is designed to process large sets of data by dividing the task into smaller sub-tasks, processing them in parallel across multiple worker nodes, and then aggregating the results. This framework consists of two main components: the Driver and the Worker.
 
-## Configuration
 
-Before running the system, ensure the configuration in `config.py` matches your setup. Important settings include:
+Execution of the MapReduce framework requires initial configuration specified in the `config.py` file. This file contains basic settings for the operation of the driver and workers, including the server host and port, paths to directories for input, intermediate, and output files, and the number of Map and Reduce tasks to execute. 
 
-- `DRIVER_HOST` and `DRIVER_PORT`: The host and port where the driver will run.
-- `INPUT_FILES_DIR`, `INTERMEDIATE_FILES_DIR`, `OUTPUT_FILES_DIR`: Directories for input, intermediate, and output files.
-- `NUM_MAP_TASKS` and `NUM_REDUCE_TASKS`: The number of map and reduce tasks to divide the work into.
-- `COMMUNICATION_PROTOCOL`: Set to either 'gRPC' or 'REST' based on your preference.
+To run the driver, it is necessary to specify any additional configuration parameters via the command line. The `driver.py` file uses an argument parser to allow the user to override the default settings defined in `config.py`. Accepted arguments include the driver server host and port, paths to directories for input, intermediate, and output files, and the number of Map and Reduce tasks. 
+### Execution Example:
 
-## Running the System
+To start the driver with custom configurations, use the following command:
+python driver.py --host=localhost --port=50051 --input_dir=./input --intermediate_dir=./intermediate --output_dir=./output --map_tasks=2 --reduce_tasks=2
 
-1. **Start the Driver**: Run `driver.py` to start the driver process. It will wait for workers to connect and request tasks.
 
-   ```
-   python driver.py
-   ```
+and in another terminal run the worker with the following command:
+python worker.py
 
-2. **Start Worker(s)**: In separate terminal windows, start one or more worker processes by running `worker.py`. Workers will connect to the driver, request tasks, and process them.
+or simply run the worker with the default configuration written in `config.py`:
+python worker.py in one or more terminals and python driver.py in another terminal.
 
-   ```
-   python worker.py
-   ```
 
-Workers can be started before or after the driver, but they will only begin processing tasks once the driver is running.
 
-## Design Overview
+### Driver (`driver.py`)
 
-- The driver divides the total work among map and reduce tasks based on the configuration and available input files.
-- Workers request tasks from the driver and perform either map or reduce operations depending on the task type assigned.
-- Map tasks involve reading input files, splitting text into words, and distributing words into buckets based on their first letter.
-- Reduce tasks aggregate words from the same bucket across all map tasks, counting occurrences, and writing the final output.
-- Communication between the driver and workers is handled over the network using the specified protocol (gRPC or REST).
+The Driver is responsible for orchestrating the MapReduce tasks. It performs several key functions:
 
-## Testing
+1. **Initialization**: Sets up the server, logging, and configuration parameters based on the provided arguments or default settings.
+2. **Task Distribution**: Divides the input data into smaller chunks, assigns Map tasks to available Worker nodes, and once Map tasks are completed, assigns Reduce tasks.
+3. **Task Monitoring**: Keeps track of the status of each task and worker. If a worker does not update its task status within a specified interval, the task is reassigned. In addition, if a worker disconnects or fails to communicate with the Driver, the system will detect this and reassign the task to another available worker to ensure the task's completion.
+4. **Result Aggregation**: Once all Reduce tasks are completed, the Driver aggregates the results and concludes the MapReduce job.
 
-The project includes basic tests to verify the functionality of utility functions and the correct operation of map and reduce tasks. Run the tests to ensure the system is working as expected.
+The Driver uses gRPC for communication with Worker nodes, allowing for efficient and reliable task assignment and status updates.
+
+#### Key Methods in `driver.py`
+
+- `__init__`: Initializes the Driver service with default configurations and starts logging.
+- `__log_config`: Logs the current configuration settings.
+- `__get_input_files`: Retrieves the list of input files to be processed.
+- `__add_task`: Adds a new task to the task list.
+- `__calculate_tasks`: Calculates and assigns tasks based on the input files.
+- `AssignTask`: Assigns a task to a worker and updates the task status.
+- `UpdateTaskStatus`: Updates the status of a task based on the worker's progress.
+- `serve_driver`: Starts the gRPC server and listens for worker connections.
+
+### Worker (`worker.py`)
+
+The Worker nodes are responsible for executing the tasks assigned by the Driver. Each Worker:
+
+1. **Requests Tasks**: Communicates with the Driver to request a new task.
+2. **Performs Tasks**: Depending on the task type (Map or Reduce), the Worker processes the assigned data chunk. For Map tasks, it processes the input data and generates intermediate key-value pairs. For Reduce tasks, it aggregates the results based on the intermediate data.
+3. **Updates Task Status**: Notifies the Driver of the task's progress and completion. If the Worker fails to update the Driver due to disconnection or any communication failure, the Driver will attempt to reassign the task to ensure its completion.
+4. **Handles Task Completion**: Once a task is completed, the Worker requests the next task until there are no more tasks to process.
+
+Workers use utility functions for data processing, such as splitting text into words, counting word occurrences, and writing results to files.
+
+#### Key Methods in `worker.py`
+
+- `__init__`: Initializes the Worker service with default configurations.
+- `RequestTask`: Requests a new task from the Driver.
+- `PerformTask`: Performs the assigned task, either Map or Reduce, based on the task type.
+- `UpdateTaskStatusDriver`: Updates the Driver with the current status of the task.
+- `perform_map_task`: Processes the input file for a Map task.
+- `perform_reduce_task`: Aggregates the results for a Reduce task.
+
+## Communication
+
+The framework utilizes gRPC for communication between the Driver and Worker nodes. This choice ensures efficient data transfer and task management in a distributed system. The `libs` directory contains the protobuf definitions (`driver_pb2.py`, `worker_pb2.py`, `task_pb2.py`) and the gRPC service stubs and servicers (`driver_pb2_grpc.py`, `worker_pb2_grpc.py`) that facilitate this communication.
 
 ## Conclusion
 
-This distributed map-reduce system demonstrates a basic implementation of the word count problem in a distributed environment. It showcases the use of Python for network communication and parallel processing of large datasets.
+This MapReduce framework efficiently processes large datasets by distributing tasks across multiple Worker nodes, managed by a central Driver. Through the use of gRPC for inter-component communication, the framework ensures reliability and scalability in processing tasks in parallel, making it suitable for a wide range of data processing applications.
 
