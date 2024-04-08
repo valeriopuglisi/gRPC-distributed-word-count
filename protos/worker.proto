@@ -8,15 +8,14 @@ package worker;
 
 message Worker {
   string id = 1;
-  string host = 2;
-  int32 port = 3;
-  WorkerStatus status = 4;
+  WorkerStatus status = 2;
 }
 
 enum WorkerStatus {
   IDLE = 0;
   IN_PROGRESS = 1;
   COMPLETED = 2;
-  FAILED = 3;
+  FINISHED =  3;
+  FAILED = 4;
 }
 

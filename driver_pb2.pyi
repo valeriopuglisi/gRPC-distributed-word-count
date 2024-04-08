@@ -35,12 +35,12 @@ class UpdateTaskStatusResponse(_message.Message):
     def __init__(self, ack: bool = ...) -> None: ...
 
 class CompleteTaskRequest(_message.Message):
-    __slots__ = ("task", "worker_id")
+    __slots__ = ("worker", "task")
+    WORKER_FIELD_NUMBER: _ClassVar[int]
     TASK_FIELD_NUMBER: _ClassVar[int]
-    WORKER_ID_FIELD_NUMBER: _ClassVar[int]
+    worker: _worker_pb2.Worker
     task: _task_pb2.Task
-    worker_id: str
-    def __init__(self, task: _Optional[_Union[_task_pb2.Task, _Mapping]] = ..., worker_id: _Optional[str] = ...) -> None: ...
+    def __init__(self, worker: _Optional[_Union[_worker_pb2.Worker, _Mapping]] = ..., task: _Optional[_Union[_task_pb2.Task, _Mapping]] = ...) -> None: ...
 
 class CompleteTaskResponse(_message.Message):
     __slots__ = ("ack",)

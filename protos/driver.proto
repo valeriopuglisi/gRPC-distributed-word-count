@@ -26,8 +26,8 @@ message UpdateTaskStatusResponse {
 
 
 message CompleteTaskRequest {
-  task.Task task = 1;
-  string worker_id = 2;
+  worker.Worker worker = 1;
+  task.Task task = 2;
 }
 message CompleteTaskResponse {
   bool ack = 1;

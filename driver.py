@@ -45,14 +45,19 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
         self.reduce_tasks_assigned = 0
         self.map_tasks_completed = 0
         self.reduce_tasks_completed = 0
-        self.input_files = self._get_input_files()
+        self.input_files = self.__get_input_files()
         self.total_map_tasks = min(NUM_MAP_TASKS, len(self.input_files))
         self.total_reduce_tasks = NUM_REDUCE_TASKS
 
         # create pandas dataframe for workers status
-        self.workers = pd.DataFrame(columns=["worker_id", "worker_status", "worker_host", "worker_port","task_type", "task_id", "task_status"])
+        self.workers = pd.DataFrame(columns=[
+            "worker_id", 
+            "worker_status", 
+            "task_type", 
+            "task_id", 
+            "task_status"])
         
-        self._calculate_tasks()
+        self.__calculate_tasks()
         
     
     def __log_config(self):
@@ -65,7 +70,7 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
         self.logger.info(f"COMMUNICATION_PROTOCOL: {COMMUNICATION_PROTOCOL}")
 
 
-    def _get_input_files(self) -> List[str]:
+    def __get_input_files(self) -> List[str]:
         """
         Retrieves the list of input files from the specified directory.
         """
@@ -74,7 +79,8 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
         self.logger.info("Input files: %s", files)
         return files
     
-    def _calculate_tasks(self):
+
+    def __calculate_tasks(self):
         for i in range(self.total_map_tasks):
             map_task = task_pb2.Task(
                 type=task_pb2.TaskType.MAP,
@@ -85,8 +91,6 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
             self.workers = self.workers._append({
                 "worker_id": None, 
                 "worker_status": None,
-                "worker_host": None, 
-                "worker_port": None,
                 "task_type": map_task.type, 
                 "task_id": map_task.id, 
                 "task_status": map_task.status, 
@@ -101,8 +105,6 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
             self.workers = self.workers._append({
                 "worker_id": None, 
                 "worker_status": None,
-                "worker_host": None, 
-                "worker_port": None,
                 "task_type": reduce_task.type, 
                 "task_id": reduce_task.id, 
                 "task_status": reduce_task.status, 
@@ -110,20 +112,33 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
                 ignore_index=True)
         self.workers.to_csv("workers.csv", index=False)
 
+
+    def __set_task_unassigned(self, task_id):
+        """
+        Imposta lo stato di un task come UNASSIGNED se il worker non aggiorna lo stato entro 60 secondi.
+        """
+        # Cerca il task corrispondente nella lista dei workers
+        task = self.workers[self.workers["task_id"] == task_id]
+        if not task.empty and task["task_status"].iloc[0] != task_pb2.TaskStatus.COMPLETED:
+            # Imposta lo stato del task come UNASSIGNED
+            self.workers.loc[task.index, "task_status"] = task_pb2.TaskStatus.UNASSIGNED
+            self.workers.to_csv("workers.csv", index=False)
+            self.logger.info("Impostato lo stato del task ID %s come UNASSIGNED dopo 60 secondi senza aggiornamenti", task_id)
+  
+
     def AssignTask(self, request, context):
         """
         Assigns a map or reduce task to a worker.
         """
         # get worker_id from request
         worker_id = request.worker.id
-        worker_host = request.worker.host
-        worker_port = request.worker.port
-
-        self.logger.info(f"Assigning task to worker ID {worker_id} , host {worker_host} , port {worker_port}")
+        map_workers = self.workers[self.workers['task_type'] == task_pb2.TaskType.MAP]
         # check if all map tasks are completed
+        
         unassigned_map_tasks = self.workers[(self.workers["task_type"] == task_pb2.TaskType.MAP) & (self.workers["task_status"] == task_pb2.TaskStatus.UNASSIGNED)]
         unassigned_reduce_tasks = self.workers[(self.workers["task_type"] == task_pb2.TaskType.REDUCE) & (self.workers["task_status"] == task_pb2.TaskStatus.UNASSIGNED)]
         
+        # If there are map tasks to assign then assign first unassigned map task
         if len(unassigned_map_tasks) > 0:
             # get the first map or reduce task that is not completed
             unassigned_map_tasks = unassigned_map_tasks.iloc[0]
@@ -149,21 +164,13 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
             self.workers.loc[
                 (self.workers["task_id"] == task_id) &
                 (self.workers["task_type"] == task_type), 
-                "worker_status"] = "OK"
-            self.workers.loc[
-                (self.workers["task_id"] == task_id) &
-                (self.workers["task_type"] == task_type), 
-                "worker_host"] = worker_host
-            self.workers.loc[
-                (self.workers["task_id"] == task_id) &
-                (self.workers["task_type"] == task_type), 
-                "worker_port"] = worker_port
+                "worker_status"] = worker_pb2.WorkerStatus.IN_PROGRESS
             self.workers.to_csv("workers.csv", index=False)
             assignResponse = driver_pb2.AssignTaskResponse(task=task)
-            self.logger.info("Assigned MAP task ID %s to worker: %s", task.id, worker_id)
+            self.logger.info("==> AssignTask: Assigned MAP task ID %s to worker: %s", task.id, worker_id)
             return assignResponse
-        
-        elif len(unassigned_reduce_tasks) > 0:
+        # If all MAP TASKS are COMPLETED and there are reduce tasks to assign then assign first unassigned reduce task
+        elif all(map_workers['task_status'] == task_pb2.TaskStatus.COMPLETED) and not unassigned_reduce_tasks.empty:
             unassigned_reduce_tasks = unassigned_reduce_tasks.iloc[0]
             # convert numpy float64 to int
             task_id =  int(unassigned_reduce_tasks["task_id"].astype(numpy.int64))
@@ -185,50 +192,35 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
                 (self.workers["task_id"] == task_id) &
                 (self.workers["task_type"] == task_type), 
                 "worker_status"] = worker_pb2.WorkerStatus.IN_PROGRESS
-            self.workers.loc[
-                (self.workers["task_id"] == task_id) &
-                (self.workers["task_type"] == task_type), 
-                "worker_host"] = worker_host
-            self.workers.loc[
-                (self.workers["task_id"] == task_id) &
-                (self.workers["task_type"] == task_type), 
-                "worker_port"] = worker_port
+           
             self.workers.to_csv("workers.csv", index=False)
             assignResponse = driver_pb2.AssignTaskResponse(task=task)
-            self.logger.info("Assigned REDUCE task ID %s to worker: %s", task.id, worker_id)
+            self.logger.info("==> AssignTask: Assigned REDUCE task ID %s to worker: %s", task.id, worker_id)
             return assignResponse
-        
-        elif all(self.workers["task_status"] == task_pb2.TaskStatus.COMPLETED):
-            self.logger.info("All tasks completed")
-            driver_pb2.AssignTaskResponse(task=task_pb2.Task(type=task_pb2.TaskType.NONE))
-            if all(self.workers["worker_status"] == worker_pb2.WorkerStatus.COMPLETED):
-                self.logger.info("All Worker closed process ... Exit")
-                os._exit(0)
-            
-        
-
-
-    def CompleteTask(self, request, context):
-        """
-        Marks a task as completed.
-        """
-        if request.task.type == task_pb2.TaskType.MAP:
-            self.logger.info("MAP task ID: %s completed ", request.task.id)
-            self.map_tasks_completed += 1
-
-
-        elif request.task.type == task_pb2.TaskType.REDUCE:
-            self.logger.info("REDUCE task ID: %s completed ", request.task.id)
-            self.reduce_tasks_completed += 1
-        
-        # search the worker in the workers dataframe
-        worker = self.workers[(self.workers["task_id"] == request.task.id) & (self.workers["task_type"] == request.task.type)]
-        # update the status of the worker
-        self.workers.loc[worker.index, "worker_status"] = worker_pb2.WorkerStatus.IDLE
-        self.workers.loc[worker.index, "task_status"] = task_pb2.TaskStatus.COMPLETED
-        self.workers.to_csv("workers.csv", index=False)
-
-        return driver_pb2.CompleteTaskResponse(ack=True)
+        # If there aren't any unassigned map or reduce tasks then assign NONE task then all tasks are completed
+        elif unassigned_map_tasks.empty and unassigned_reduce_tasks.empty:
+            # create task that sign end of works 
+            task = task_pb2.Task(
+                type=task_pb2.TaskType.FINISH,
+                status=task_pb2.TaskStatus.COMPLETED,
+                id=0,
+                filename=""
+            )
+            print(task)
+            assignResponse = driver_pb2.AssignTaskResponse(task=task)
+            self.logger.info("==> AssignTask: Assigned NONE and STATUS COMPLETED task to worker ID: %s", worker_id)
+            return assignResponse
+        # If there are unassigned reduce tasks and MAP task IN_PROGRESS then assign a WAIT task
+        else:
+            task = task_pb2.Task(
+                type=task_pb2.TaskType.WAIT,
+                status=task_pb2.TaskStatus.IN_PROGRESS,
+                id=0,
+                filename=""
+            )
+            assignResponse = driver_pb2.AssignTaskResponse(task=task)
+            self.logger.info("==> AssignTask: Assigned NONE and STATUS IN_PROGRESS task to worker ID: %s", worker_id)
+            return assignResponse
 
     def UpdateTaskStatus(self, request, context):
         """
@@ -236,8 +228,12 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
         Se il worker non aggiorna lo stato entro questo tempo, il task viene settato come UNASSIGNED.
         """
 
-        self.logger.info("UpdateTaskStatus: Aggiornato lo stato del worker %s a %s", request.worker.id, request.worker.status)
+        self.logger.info("==> UpdateTaskStatus: Updated task status for Worker ID %s with status %s", request.worker.id, request.worker.status)
         self.workers.loc[self.workers["worker_id"] == request.worker.id, "worker_status"] = request.worker.status
+
+        if all(self.workers["worker_status"] == worker_pb2.WorkerStatus.COMPLETED) and all(self.workers["task_status"] == task_pb2.TaskStatus.COMPLETED):
+            self.logger.info("UpdateTaskStatus: All Worker closed process ... Exit")
+            os._exit(0)
 
         # Cerca il worker e il task corrispondente nella lista dei workers
         worker = self.workers[(self.workers["worker_id"] == request.worker.id) & 
@@ -248,27 +244,17 @@ class MapReduceDriverService(driver_pb2_grpc.MapReduceDriverServicer):
             self.workers.loc[worker.index, "task_status"] = request.task.status
             self.workers.loc[worker.index, "worker_status"] = request.worker.status
             self.workers.to_csv("workers.csv", index=False)
-            self.logger.info("Aggiornato lo stato del task ID %s a %s", request.task.id, request.task.status)
+            self.logger.info("==> UpdateTaskStatus: Updated task ID %s with status %s", request.task.id, request.task.status)
             
             # Avvia il timer
-            timer = threading.Timer(10.0, self.set_task_unassigned, [request.task.id])
+            timer = threading.Timer(10.0, self.__set_task_unassigned, [request.task.id])
             timer.start()
             
             return driver_pb2.UpdateTaskStatusResponse(ack=True)
-        
-    
-    def set_task_unassigned(self, task_id):
-        """
-        Imposta lo stato di un task come UNASSIGNED se il worker non aggiorna lo stato entro 60 secondi.
-        """
-        # Cerca il task corrispondente nella lista dei workers
-        task = self.workers[self.workers["task_id"] == task_id]
-        if not task.empty and task["task_status"].iloc[0] != task_pb2.TaskStatus.COMPLETED:
-            # Imposta lo stato del task come UNASSIGNED
-            self.workers.loc[task.index, "task_status"] = task_pb2.TaskStatus.UNASSIGNED
-            self.workers.to_csv("workers.csv", index=False)
-            self.logger.info("Impostato lo stato del task ID %s come UNASSIGNED dopo 60 secondi senza aggiornamenti", task_id)
-  
+        else :
+            return driver_pb2.UpdateTaskStatusResponse(ack=False)
+
+
 def serve_driver(driver):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     driver_pb2_grpc.add_MapReduceDriverServicer_to_server(driver, server)
@@ -277,8 +263,12 @@ def serve_driver(driver):
     try:
         while True:
             time.sleep(1)
+            if all(driver.workers["worker_status"] == worker_pb2.WorkerStatus.COMPLETED) and all(driver.workers["task_status"] == task_pb2.TaskStatus.COMPLETED):
+                driver.logger.info("Server Driver: All Worker closed process ... Exit")
+                os._exit(0)
     except KeyboardInterrupt:
         server.stop(0)
+
 
 if __name__ == '__main__':
     

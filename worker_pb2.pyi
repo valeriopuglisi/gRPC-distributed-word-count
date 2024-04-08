@@ -10,20 +10,18 @@ class WorkerStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     IDLE: _ClassVar[WorkerStatus]
     IN_PROGRESS: _ClassVar[WorkerStatus]
     COMPLETED: _ClassVar[WorkerStatus]
+    FINISHED: _ClassVar[WorkerStatus]
     FAILED: _ClassVar[WorkerStatus]
 IDLE: WorkerStatus
 IN_PROGRESS: WorkerStatus
 COMPLETED: WorkerStatus
+FINISHED: WorkerStatus
 FAILED: WorkerStatus
 
 class Worker(_message.Message):
-    __slots__ = ("id", "host", "port", "status")
+    __slots__ = ("id", "status")
     ID_FIELD_NUMBER: _ClassVar[int]
-    HOST_FIELD_NUMBER: _ClassVar[int]
-    PORT_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     id: str
-    host: str
-    port: int
     status: WorkerStatus
-    def __init__(self, id: _Optional[str] = ..., host: _Optional[str] = ..., port: _Optional[int] = ..., status: _Optional[_Union[WorkerStatus, str]] = ...) -> None: ...
+    def __init__(self, id: _Optional[str] = ..., status: _Optional[_Union[WorkerStatus, str]] = ...) -> None: ...

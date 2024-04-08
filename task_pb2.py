@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ntask.proto\x12\x04task\"d\n\x04Task\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x1c\n\x04type\x18\x02 \x01(\x0e\x32\x0e.task.TaskType\x12 \n\x06status\x18\x03 \x01(\x0e\x32\x10.task.TaskStatus\x12\x10\n\x08\x66ilename\x18\x04 \x01(\t*)\n\x08TaskType\x12\x08\n\x04NONE\x10\x00\x12\x07\n\x03MAP\x10\x01\x12\n\n\x06REDUCE\x10\x02*H\n\nTaskStatus\x12\x0e\n\nUNASSIGNED\x10\x00\x12\x0f\n\x0bIN_PROGRESS\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ntask.proto\x12\x04task\"d\n\x04Task\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x1c\n\x04type\x18\x02 \x01(\x0e\x32\x0e.task.TaskType\x12 \n\x06status\x18\x03 \x01(\x0e\x32\x10.task.TaskStatus\x12\x10\n\x08\x66ilename\x18\x04 \x01(\t*?\n\x08TaskType\x12\x08\n\x04NONE\x10\x00\x12\x07\n\x03MAP\x10\x01\x12\n\n\x06REDUCE\x10\x02\x12\x08\n\x04WAIT\x10\x03\x12\n\n\x06\x46INISH\x10\x04*H\n\nTaskStatus\x12\x0e\n\nUNASSIGNED\x10\x00\x12\x0f\n\x0bIN_PROGRESS\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,9 +22,9 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'task_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_TASKTYPE']._serialized_start=122
-  _globals['_TASKTYPE']._serialized_end=163
-  _globals['_TASKSTATUS']._serialized_start=165
-  _globals['_TASKSTATUS']._serialized_end=237
+  _globals['_TASKTYPE']._serialized_end=185
+  _globals['_TASKSTATUS']._serialized_start=187
+  _globals['_TASKSTATUS']._serialized_end=259
   _globals['_TASK']._serialized_start=20
   _globals['_TASK']._serialized_end=120
 # @@protoc_insertion_point(module_scope)

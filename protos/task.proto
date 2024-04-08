@@ -7,6 +7,8 @@ enum TaskType {
     NONE = 0; // Nessun task assegnato
     MAP = 1;  // Task di tipo Map
     REDUCE = 2; // Task di tipo Reduce
+    WAIT = 3; // Task di tipo Wait
+    FINISH = 4; // Task di tipo Finish
 }
 
 enum TaskStatus {

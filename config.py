@@ -17,11 +17,11 @@ OUTPUT_FILES_DIR = './output_files'
 
 # Number of map tasks to divide the input files into
 # This can be adjusted based on the number of input files or desired level of parallelism
-NUM_MAP_TASKS = 1
+NUM_MAP_TASKS = 2
 
 # Number of reduce tasks to aggregate the intermediate results
 # This should be less than or equal to the number of unique first letters in words across all input files
-NUM_REDUCE_TASKS = 1  # Assuming English alphabet
+NUM_REDUCE_TASKS = 4  # Assuming English alphabet
 
 # Communication Protocol
 # This can be either 'gRPC' or 'REST'. Change according to your preference and implementation.

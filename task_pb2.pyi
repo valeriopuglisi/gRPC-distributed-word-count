@@ -10,6 +10,8 @@ class TaskType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     NONE: _ClassVar[TaskType]
     MAP: _ClassVar[TaskType]
     REDUCE: _ClassVar[TaskType]
+    WAIT: _ClassVar[TaskType]
+    FINISH: _ClassVar[TaskType]
 
 class TaskStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -20,6 +22,8 @@ class TaskStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
 NONE: TaskType
 MAP: TaskType
 REDUCE: TaskType
+WAIT: TaskType
+FINISH: TaskType
 UNASSIGNED: TaskStatus
 IN_PROGRESS: TaskStatus
 COMPLETED: TaskStatus

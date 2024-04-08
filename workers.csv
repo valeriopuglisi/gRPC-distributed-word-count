@@ -1,3 +1,7 @@
-worker_id,worker_status,worker_host,worker_port,task_type,task_id,task_status
-22271,0,localhost,1024.0,1.0,0.0,2.0
-22271,0,localhost,1024.0,2.0,0.0,2.0
+worker_id,worker_status,task_type,task_id,task_status
+6640,2.0,1.0,0.0,2.0
+6624,2.0,1.0,1.0,2.0
+6640,2.0,2.0,0.0,2.0
+6624,2.0,2.0,1.0,2.0
+6640,2.0,2.0,2.0,2.0
+6624,2.0,2.0,3.0,2.0
