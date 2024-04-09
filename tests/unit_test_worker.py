@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import worker
-import worker_pb2
-import driver_pb2
-import task_pb2
+import libs.worker_pb2 as worker_pb2
+import libs.driver_pb2 as driver_pb2
+import libs.task_pb2 as task_pb2
 import os
 
 class TestWorkerService(unittest.TestCase):
